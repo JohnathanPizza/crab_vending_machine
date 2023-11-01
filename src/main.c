@@ -34,7 +34,8 @@ static unsigned memorySize = 0;
 static unsigned char* memoryChunk = NULL;
 static unsigned memoryEnd = 0;
 
-bool verboseEnabled = false;
+static bool generateOutput = true;
+static bool verboseEnabled = false;
 static const char* outputName = "out.mb";
 
 static void processOptions(int argCount, char* argValues[]);
@@ -96,13 +97,13 @@ int main(int argc, char* argv[]){
 			// check the first character of the line to see what to do with the line
 			switch(start[0]){
 			case '>': // implied label line
-				processImplicitLabel(start + 1);
+				processImplicitLabel(wordFind(start + 1));
 				break;
 			case '=': // explicit label line
-				processExplicitLabel(start + 1);
+				processExplicitLabel(wordFind(start + 1));
 				break;
 			case '@': // position line
-				processPosition(start + 1);
+				processPosition(wordFind(start + 1));
 				break;
 			case '!': // byte line
 				virtualPosition += 1;
@@ -184,6 +185,8 @@ int main(int argc, char* argv[]){
 			for(size_t positionIdx = 0; positionIdx < positionCount; ++positionIdx){
 				struct Position* p = getDArray(&positionArray, positionIdx);
 				if(p->dependencyCount != -1){
+					currentFileID = p->fileID;
+					currentLine = p->lineNumber;
 					printErrorHeader();
 					fprintf(stderr, "%s\n", p->expression);
 				}
@@ -191,6 +194,8 @@ int main(int argc, char* argv[]){
 			for(int labelIdx = 0; labelIdx < labelCount; ++labelIdx){
 				struct Label* l = getDArray(&labelArray, labelIdx);
 				if(l->dependencyCount != -1 && l->expression != NULL){
+					currentFileID = l->fileID;
+					currentLine = l->lineNumber;
 					printErrorHeader();
 					fprintf(stderr, "%s\n", l->expression);
 				}
@@ -233,7 +238,7 @@ int main(int argc, char* argv[]){
 				}
 				break;
 			case '!':
-				if(!evalExpression(start + 1, &tempv)){
+				if(!evalExpression(wordFind(start + 1), &tempv)){
 					printErrorHeader();
 					printError(ERROR_EXPRESSION_EVALUATION);
 					exit(EXIT_FAILURE);
@@ -242,7 +247,7 @@ int main(int argc, char* argv[]){
 				virtualPosition += 1;
 				break;
 			case '$':
-				if(!evalExpression(start + 1, &tempv)){
+				if(!evalExpression(wordFind(start + 1), &tempv)){
 					printErrorHeader();
 					printError(ERROR_EXPRESSION_EVALUATION);
 					exit(EXIT_FAILURE);
@@ -335,13 +340,15 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	FILE* filePointer = fopen(outputName, "w");
-	if(filePointer == NULL){
-		fprintf(stderr, "couldn't open output file: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+	if(generateOutput){
+		FILE* filePointer = fopen(outputName, "w");
+		if(filePointer == NULL){
+			fprintf(stderr, "couldn't open output file: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		fwrite(memoryChunk, 1, memorySize, filePointer);
+		fclose(filePointer);
 	}
-	fwrite(memoryChunk, 1, memorySize, filePointer);
-	fclose(filePointer);
 	free(memoryChunk);
 	
 	if(verboseEnabled == false){
@@ -371,7 +378,7 @@ static void processOptions(int argCount, char* argValues[]){
 	int base;
 	int size;
 	while(1){
-		switch(getopt(argCount, argValues, ":o:b:s:vh")){
+		switch(getopt(argCount, argValues, ":o:b:s:vxh")){
 		case 'b':
 			if(!strToInt(optarg, strlen(optarg), &base)){
 				fprintf(stderr, "couldn't make base from arg\n");
@@ -392,9 +399,13 @@ static void processOptions(int argCount, char* argValues[]){
 		case 'v':
 			verboseEnabled = true;
 			break;
+		case 'x':
+			generateOutput = false;
+			break;
 		case 'h':
 			puts("available options:\n"
 				"-h, print help menu\n"
+				"-x, dont' create output file\n"
 				"-v, print verbose output\n"
 				"-w, print warnings\n"
 				"-b BASE, specify the base address of the output\n"
