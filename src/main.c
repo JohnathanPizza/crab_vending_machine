@@ -407,7 +407,7 @@ static void processOptions(int argCount, char* argValues[]){
 				"-h, print help menu\n"
 				"-x, dont' create output file\n"
 				"-v, print verbose output\n"
-				"-w, print warnings\n"
+				"-o NAME, change output file name to NAME\n"
 				"-b BASE, specify the base address of the output\n"
 				"-s SIZE, specify the size of the output in bytes\n"
 			);
