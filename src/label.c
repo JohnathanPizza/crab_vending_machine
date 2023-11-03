@@ -47,7 +47,7 @@ void processImplicitLabel(const char* line){
 	// try to find an existing label with the same name and replace it
 	for(size_t idx = 0; idx < labelCount; ++idx){
 		struct Label* lp = getDArray(&labelArray, idx);
-		if(strlen(label.name) == strlen(lp->name) && strcmp(label.name, lp->name) == 0){
+		if(strlen(label.name) == strlen(lp->name) && strncmp(label.name, lp->name, strlen(label.name)) == 0){
 			// if the label name was found but the label is already defined, print error and exit
 			if(lp->defined){
 				printErrorHeader();
@@ -96,7 +96,7 @@ void processExplicitLabel(const char* line){
 			bool wasFound = false;
 			for(size_t idx = 0; idx < labelCount; ++idx){
 				struct Label* lp = getDArray(&labelArray, idx);
-				if(wordLen(line) == strlen(lp->name) && strcmp(line, lp->name) == 0){
+				if(wordLen(line) == strlen(lp->name) && strncmp(line, lp->name, strlen(lp->name)) == 0){
 					// names are exactly equal, label already exists in array
 					// add it as a dependency
 					addDArray(&label.dependencies, &idx, label.dependencyCount++);
@@ -128,7 +128,7 @@ void processExplicitLabel(const char* line){
 	// try to find an existing label with the same name and replace it
 	for(size_t idx = 0; idx < labelCount; ++idx){
 		struct Label* lp = getDArray(&labelArray, idx);
-		if(strlen(label.name) == strlen(lp->name) && strcmp(label.name, lp->name) == 0){
+		if(strlen(label.name) == strlen(lp->name) && strncmp(label.name, lp->name, strlen(lp->name)) == 0){
 			// if the label name was found but the label is already defined, print error and exit
 			if(lp->defined){
 				printErrorHeader();

@@ -28,7 +28,7 @@ void processPosition(const char* line){
 			bool wasFound = false;
 			for(size_t idx = 0; idx < labelCount; ++idx){
 				struct Label* lp = getDArray(&labelArray, idx);
-				if(wordLen(line) == strlen(lp->name) && strcmp(line, lp->name) == 0){
+				if(wordLen(line) == strlen(lp->name) && strncmp(line, lp->name, strlen(lp->name)) == 0){
 					// names are exactly equal, label already exists in array
 					// add it as a dependency
 					addDArray(&position.dependencies, &idx, position.dependencyCount++);
