@@ -324,7 +324,7 @@ int main(int argc, char* argv[]){
 			addToMemory(pos + 1, v);
 		}else{
 			if(ip->info.size == 2){
-				if((ip->value >= 0xFF || ip->value < 0) && strstr(ip->info.name, ".Z") != NULL){
+				if((ip->value > 0xFF || ip->value < 0) && strstr(ip->info.name, ".Z") != NULL){
 					printErrorHeader();
 					printWarning(WARNING_INSTRUCTION_ZP_TRUNCATION);
 				}
