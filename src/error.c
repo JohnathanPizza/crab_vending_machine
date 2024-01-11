@@ -19,6 +19,7 @@ static const char* const errorStrings[] = {
 	[ERROR_LABEL_DUPLICATE] = "label \"%s\" already defined (found also in %s @ %d)\n", // label name, alterante file name, alternate file line
 	[ERROR_STRING_ESCAPE] = "string escape sequence not valid\n",
 	[WARNING_POSITION_NEGATIVE] = "position value is negative\n",
+	[ERROR_LABEL_UNDEFINED] = "label \"%.*s\" used but never defined\n", // label name
 };
 
 void printErrorHeader(void){

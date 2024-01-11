@@ -159,7 +159,16 @@ int main(int argc, char* argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	// eval attempts now pookie muffins
+	// quick search for any undefined labels
+	for(size_t labelIdx = 0; labelIdx < labelCount; ++labelIdx){
+		struct Label* lp = getDArray(&labelArray, labelIdx);
+		if(!lp->defined){
+			printError(ERROR_LABEL_UNDEFINED, wordLen(lp->name), lp->name);
+			exit(1);
+		}
+	}
+
+	// eval attempts now
 	size_t remaining = labelCount + positionCount;
 	while(1){
 		size_t unsolved = 0;

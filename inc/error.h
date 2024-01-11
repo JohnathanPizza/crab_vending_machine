@@ -16,6 +16,7 @@
 #define ERROR_LABEL_DUPLICATE 10
 #define ERROR_STRING_ESCAPE 11
 #define WARNING_POSITION_NEGATIVE 12
+#define ERROR_LABEL_UNDEFINED 13
 
 // prints the current file name and line to stderr
 void printErrorHeader(void);
