@@ -2,7 +2,7 @@
 #include <string.h>
 #include "word.h"
 
-#define OPCODE_COUNT 212
+#define OPCODE_COUNT 214 // +2 for alias
 
 static const struct OpcodeInfo opcodeTable[OPCODE_COUNT] = {
 	{"ADC.A",	0X6D, 3},
@@ -45,7 +45,9 @@ static const struct OpcodeInfo opcodeTable[OPCODE_COUNT] = {
 	{"BBS6.A",	0XEF, 2},
 	{"BBS7.A",	0XFF, 2},
 	{"BCC.A",	0X90, 2},
+	{"BLS.A",	0X90, 2},	// BCC alias
 	{"BCS.A",	0XB0, 2},
+	{"BGE.A",	0XB0, 2},	// BCS alias
 	{"BEQ.A",	0XF0, 2},
 	{"BIT.A",	0X2C, 3},
 	{"BIT.X",	0X3C, 3},
