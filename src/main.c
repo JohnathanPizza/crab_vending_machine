@@ -37,6 +37,7 @@ static unsigned memoryEnd = 0;
 static bool generateOutput = true;
 static bool verboseEnabled = false;
 static const char* outputName = "out.mb";
+static bool adjustmentOutput = false;
 
 static void processOptions(int argCount, char* argValues[]);
 static char* formatLine(char* line);
@@ -315,6 +316,15 @@ int main(int argc, char* argv[]){
 			}
 		}
 	}
+
+	FILE* adjFile = NULL;
+	if(adjustmentOutput){
+		adjFile = fopen("out.adj", "w");
+		if(adjFile == NULL){
+			fprintf(stderr, "couldn't open adjustment file: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
 	
 	for(int instructionIdx = 0; instructionIdx < instructionCount; ++instructionIdx){
 		struct Instruction* ip = getDArray(&instructions, instructionIdx);
@@ -339,7 +349,10 @@ int main(int argc, char* argv[]){
 				}
 				addToMemory(pos + 1, ip->value);
 			}else if(ip->info.size == 3){
-				if(ip->value < 0 || ip->value > 0xFFFF){
+				if(ip->value >= 0x10000 && adjustmentOutput){
+					fputc(pos - 0x10000 + 1, adjFile);
+					fputc((pos - 0x10000 + 1) >> 8, adjFile);
+				}else if(ip->value < 0 || ip->value > 0xFFFF){
 					printErrorHeader();
 					printWarning(WARNING_INSTRUCTION_ABS_TRUNCATION);
 				}
@@ -347,6 +360,12 @@ int main(int argc, char* argv[]){
 				addToMemory(pos + 2, ip->value >> 8);
 			}
 		}
+	}
+
+	if(adjustmentOutput){
+		fputc(0, adjFile);
+		fputc(0, adjFile);
+		fclose(adjFile);
 	}
 
 	if(generateOutput){
@@ -387,7 +406,7 @@ static void processOptions(int argCount, char* argValues[]){
 	int base;
 	int size;
 	while(1){
-		switch(getopt(argCount, argValues, ":o:b:s:vxh")){
+		switch(getopt(argCount, argValues, ":o:b:s:vxah")){
 		case 'b':
 			if(!strToInt(optarg, strlen(optarg), &base)){
 				fprintf(stderr, "couldn't make base from arg\n");
@@ -416,11 +435,15 @@ static void processOptions(int argCount, char* argValues[]){
 				"-h, print help menu\n"
 				"-x, dont' create output file\n"
 				"-v, print verbose output\n"
+				"-a, create adjustment file for symbols above 0x10000\n"
 				"-o NAME, change output file name to NAME\n"
 				"-b BASE, specify the base address of the output\n"
 				"-s SIZE, specify the size of the output in bytes\n"
 			);
 			exit(EXIT_SUCCESS);
+			break;
+		case 'a':
+			adjustmentOutput = true;
 			break;
 		case ':':
 			fprintf(stderr, "%c is missing its argument\n", optopt);
